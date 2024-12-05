@@ -22,11 +22,12 @@ userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   try {
+    // Generamos el salt y luego hasheamos la contraseña
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
+    next();  // Continuamos con el guardado del usuario
   } catch (error) {
-    next(error);
+    next(error);  // Si ocurre algún error, lo pasamos al siguiente middleware
   }
 });
 

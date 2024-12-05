@@ -20,8 +20,7 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'El usuario ya existe.' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword, role });
+    const newUser = new User({ name, email, password, role });  // Sin hacer hash aquí
     const savedUser = await newUser.save();
 
     const token = jwt.sign({ userId: savedUser._id, role: savedUser.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -47,18 +46,27 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Usuario no encontrado.' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    // Comprobamos que la contraseña ingresada coincida con la almacenada
+    const isMatch = await bcrypt.compare(password.trim(), user.password);
+
     if (!isMatch) {
       return res.status(400).json({ message: 'Contraseña incorrecta.' });
     }
 
+    // Si la contraseña es correcta, generamos el token JWT
     const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ message: 'Login exitoso.', token });
+
+    res.status(200).json({
+      message: 'Login exitoso.',
+      token,
+      user: { name: user.name, email: user.email, role: user.role },
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error en el servidor.' });
+    console.error('Error en el login:', error);
+    res.status(500).json({ message: 'Error en el servidor. Por favor, intenta nuevamente más tarde.' });
   }
 };
+
 
 // Función para recuperación de contraseña
 const forgotPassword = async (req, res) => {
