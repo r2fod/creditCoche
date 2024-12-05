@@ -3,6 +3,8 @@ const connectDB = require('./config/db');
 require('dotenv').config(); 
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
+const errorMiddleware = require('./middleware/errorMiddleware');
+const rateLimitMiddleware = require('./middleware/rateLimitMiddleware');
 
 const app = express();
 
@@ -19,6 +21,9 @@ app.use(express.json());  // Este middleware es suficiente para parsear JSON
 
 // Rutas
 app.use('/api/auth', authRoutes);  // Asegúrate de usar el prefijo '/api/auth'
+
+app.use(rateLimitMiddleware); // Aplica el rate limiting
+app.use(errorMiddleware); // Agrega el middleware de errores
 
 // Configuración del servidor
 const PORT = process.env.PORT || 5000;

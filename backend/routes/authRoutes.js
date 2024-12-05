@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerUser, loginUser, forgotPassword, resetPassword } = require('../controllers/authController');
+const { registerUser, loginUser, forgotPassword, verifyResetToken, resetPassword } = require('../controllers/authController');
 const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
@@ -11,6 +11,9 @@ router.post('/login', loginUser);
 
 // Ruta para solicitar el enlace de recuperación de contraseña (forgot-password)
 router.post('/forgot-password', forgotPassword);
+
+// Ruta para verificar el token de restablecimiento
+router.get('/verify-reset-token/:token', verifyResetToken);
 
 // Ruta para restablecer la contraseña
 router.post('/reset-password', authMiddleware, resetPassword); // La ruta está protegida por el middleware de autenticación

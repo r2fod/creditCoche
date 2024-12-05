@@ -1,35 +1,19 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';  // Usamos jwtDecode correctamente
+// components/PrivateRoute.js
+import { Navigate, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';  // Si usas Redux para el estado
 
-const PrivateRoute = ({ roles, component: Component }) => {
-  const token = localStorage.getItem('token');
-  
-  if (!token) {
-    return <Navigate to="/login" />;
-  }
+const PrivateRoute = ({ roles }) => {
+    const user = useSelector(state => state.user);  // O usa cualquier otro método para obtener el usuario
 
-  // Decodificamos el token para obtener el rol y verificar si ha expirado
-  const decodedToken = jwtDecode(token);
-  const userRole = decodedToken.role;
+    if (!user) {
+        return <Navigate to="/login" />;
+    }
 
-  // Verificamos si el token ha expirado
-  const isTokenExpired = (decoded) => {
-    const expirationTime = decoded.exp * 1000; // Expiración en milisegundos
-    return Date.now() > expirationTime;
-  };
+    if (!roles.includes(user.role)) {
+        return <Navigate to="/unauthorized" />;
+    }
 
-  // Si el token ha expirado, redirigimos al login
-  if (isTokenExpired(decodedToken)) {
-    return <Navigate to="/login" />;
-  }
-
-  // Si el rol del usuario no coincide con el rol requerido para la ruta, redirigimos
-  if (!roles.includes(userRole)) {
-    return <Navigate to="/" />;
-  }
-
-  return <Component />;
+    return <Outlet />;
 };
 
 export default PrivateRoute;

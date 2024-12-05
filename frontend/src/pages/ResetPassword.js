@@ -14,7 +14,22 @@ const ResetPassword = () => {
   useEffect(() => {
     if (!token) {
       setError('Token inválido.');
+      return;
     }
+
+    const verifyToken = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/auth/verify-reset-token/${token}`);
+        if (response.status === 200) {
+          setMessage(response.data.message);  // Mensaje de éxito si el token es válido
+        }
+      } catch (err) {
+        setError('El token es inválido o ha expirado.');
+        console.error('Error al verificar el token:', err);
+      }
+    };
+
+    verifyToken();
   }, [token]);
 
   const handleSubmit = async (e) => {
@@ -32,6 +47,7 @@ const ResetPassword = () => {
       });
       setMessage(response.data.message); // Mensaje de éxito
       setError(null); // Limpiar cualquier error
+      navigate('/login'); // Redirigir al login después de restablecer la contraseña
     } catch (err) {
       setMessage(null); // Limpiar el mensaje de éxito
       setError('Hubo un error al restablecer la contraseña.');

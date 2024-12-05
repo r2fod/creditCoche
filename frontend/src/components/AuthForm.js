@@ -49,11 +49,11 @@ const AuthForm = ({ type, onSubmit }) => {
     }
 
     // Verificar que la contraseña tenga al menos 8 caracteres, un número y un carácter especial
-    // const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-    // if (type === 'register' && !passwordRegex.test(formData.password)) {
-    //   setError('La contraseña debe tener al menos 8 caracteres, un número y un carácter especial.');
-    //   return false;
-    // }
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    if (type === 'register' && !passwordRegex.test(formData.password)) {
+      setError('La contraseña debe tener al menos 8 caracteres, un número y un carácter especial.');
+      return false;
+    }
 
     setError(null); // Limpiar error si todo es válido
     return true;
@@ -92,7 +92,7 @@ const AuthForm = ({ type, onSubmit }) => {
       
       {/* Spinner de carga */}
       {loading ? (
-        <div className="spinner">Cargando...</div> // Agregar spinner de carga
+        <div className="spinner">Cargando...</div> // Spinner de carga
       ) : (
         <button className="form-button" type="submit">
           {type === 'register' ? 'Registrarse' : 'Iniciar sesión'}
