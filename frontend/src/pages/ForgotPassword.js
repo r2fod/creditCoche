@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Importa Link aquí
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import '../assets/styles/App.css';
 
@@ -15,7 +15,9 @@ const ForgotPassword = () => {
       // Enviamos la solicitud para el enlace de recuperación de contraseña
       const response = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
       setMessage(response.data.message); // Mensaje exitoso recibido del backend
+      setError(null); // Limpiamos cualquier error previo
     } catch (err) {
+      setMessage(null); // Limpiamos el mensaje de éxito previo
       setError('Hubo un problema enviando el enlace de recuperación.');
       console.error('Error en el proceso de recuperación:', err);
     }

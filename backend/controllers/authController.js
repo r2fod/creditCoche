@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const validator = require('validator'); // Agregamos una librería para validar el email
 require('dotenv').config(); // Cargar las variables de entorno
+const nodemailer = require('nodemailer');
 
 // Función para registrar un nuevo usuario
 const registerUser = async (req, res) => {
@@ -121,7 +122,7 @@ const forgotPassword = async (req, res) => {
     const resetLink = `http://localhost:3000/reset-password/${resetToken}`; // Aquí se generará el enlace de restablecimiento
 
     const mailOptions = {
-      from: 'your-email@example.com', // Reemplaza con tu correo
+      from: 'info@creditoportucoche.com', // Reemplaza con tu correo
       to: email,
       subject: 'Recuperación de contraseña',
       text: `Para restablecer tu contraseña, haz clic en el siguiente enlace: ${resetLink}`,
@@ -141,4 +142,31 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, forgotPassword  };
+// Función para restablecer la contraseña con el token
+const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    // Buscar al usuario con el token de restablecimiento
+    const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpire: { $gt: Date.now() } });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Token inválido o expirado' });
+    }
+
+    // Establecer la nueva contraseña y limpiar el token y la expiración
+    user.password = await bcrypt.hash(newPassword, 10); // Encriptamos la nueva contraseña
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    // Guardar los cambios
+    await user.save();
+
+    res.status(200).json({ message: 'Contraseña actualizada con éxito' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Hubo un error al restablecer la contraseña' });
+  }
+};
+
+module.exports = { registerUser, loginUser, forgotPassword, resetPassword };
