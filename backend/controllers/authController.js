@@ -97,13 +97,13 @@ const forgotPassword = async (req, res) => {
       text: `Para restablecer tu contraseña, haz clic en el siguiente enlace: ${resetLink}`,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log('Error al enviar el correo:', error);
-        return res.status(500).json({ message: 'Hubo un error enviando el correo.' });
-      }
+    try {
+      await transporter.sendMail(mailOptions);
       res.status(200).json({ message: 'Enlace de recuperación enviado a tu correo.' });
-    });
+    } catch (mailError) {
+      console.log('Error al enviar el correo:', mailError);
+      return res.status(500).json({ message: 'Hubo un error enviando el correo.' });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Hubo un error en el proceso de recuperación.' });

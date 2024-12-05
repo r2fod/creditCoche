@@ -14,10 +14,11 @@ const userSchema = new mongoose.Schema({
   },
   resetPasswordToken: { type: String },
   resetPasswordExpire: { type: Date },
-});
+}, { timestamps: true }); // Agregar timestamps (createdAt, updatedAt)
 
 // Middleware para hashear la contraseña antes de guardarla
 userSchema.pre('save', async function (next) {
+  // Solo ejecutamos el hash de la contraseña si es nueva o modificada
   if (!this.isModified('password')) return next();
 
   try {
@@ -40,6 +41,11 @@ userSchema.methods.generateResetToken = function () {
   this.resetPasswordToken = resetToken;
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // Token expira en 10 minutos
   return resetToken;
+};
+
+// Agregar un método estático para obtener un usuario por correo electrónico
+userSchema.statics.findByEmail = async function (email) {
+  return this.findOne({ email });
 };
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,6 +1,6 @@
 const express = require('express');
-const connectDB = require('./config/db'); 
-require('dotenv').config(); 
+const connectDB = require('./config/db');
+require('dotenv').config();
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const errorMiddleware = require('./middleware/errorMiddleware');
@@ -11,19 +11,27 @@ const app = express();
 // Conectar a la base de datos
 connectDB();
 
-// Middleware
+// Configurar el middleware de CORS
 app.use(cors({
-  origin: 'http://localhost:3000', // La URL de tu frontend
-  methods: ['GET', 'POST'],
+  origin: 'http://localhost:3000', // La URL de tu frontend (ajustar si el frontend está en otro puerto)
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Asegúrate de permitir todos los métodos necesarios
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(express.json());  // Este middleware es suficiente para parsear JSON
+
+// Configurar Express para usar JSON
+app.use(express.json());
+
+// Configurar Express para confiar en las cabeceras de los proxies (solo si es necesario)
+app.set('trust proxy', 1); // Si la app está detrás de un proxy
 
 // Rutas
-app.use('/api/auth', authRoutes);  // Asegúrate de usar el prefijo '/api/auth'
+app.use('/api/auth', authRoutes); // Asegúrate de usar el prefijo '/api/auth'
 
-app.use(rateLimitMiddleware); // Aplica el rate limiting
-app.use(errorMiddleware); // Agrega el middleware de errores
+// Middleware de limitación de tasa
+app.use(rateLimitMiddleware); // Aplica el rate limiting a todas las rutas
+
+// Middleware de manejo de errores
+app.use(errorMiddleware); // Agrega el middleware de errores al final
 
 // Configuración del servidor
 const PORT = process.env.PORT || 5000;

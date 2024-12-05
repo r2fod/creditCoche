@@ -18,7 +18,6 @@ router.get('/verify-reset-token/:token', verifyResetToken);
 // Ruta para restablecer la contraseña
 router.post('/reset-password', authMiddleware, resetPassword); // La ruta está protegida por el middleware de autenticación
 
-
 // Ruta protegida para acceder al dashboard, según el rol
 router.get('/dashboard', authMiddleware, (req, res) => {
   const role = req.user.role; // Obtenemos el rol desde el token
@@ -36,7 +35,7 @@ router.get('/dashboard', authMiddleware, (req, res) => {
     case 'Administrador':
       return res.status(200).json({ message: 'Bienvenido al Dashboard de Administrador', role });
     default:
-      return res.status(403).json({ message: 'Acceso denegado' });
+      return res.status(403).json({ message: 'Acceso denegado. Rol no autorizado' });
   }
 });
 
