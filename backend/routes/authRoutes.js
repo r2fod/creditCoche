@@ -1,3 +1,4 @@
+// authRoutes.js
 const express = require('express');
 const { registerUser, loginUser, forgotPassword, verifyResetToken, resetPassword } = require('../controllers/authController');
 const authMiddleware = require('../middleware/auth');
@@ -16,25 +17,22 @@ router.post('/forgot-password', forgotPassword);
 router.get('/verify-reset-token/:token', verifyResetToken);
 
 // Ruta para restablecer la contraseña
-router.post('/reset-password', authMiddleware, resetPassword); // La ruta está protegida por el middleware de autenticación
+router.post('/reset-password', resetPassword); 
 
 // Ruta protegida para acceder al dashboard, según el rol
 router.get('/dashboard', authMiddleware, (req, res) => {
-  const role = req.user.role; // Obtenemos el rol desde el token
+  const role = req.user?.role?.trim(); // Normalizamos el rol
+  console.log('Rol recibido en authRoutes:', role);
 
-  // Usamos un switch para manejar los roles y redirigir al dashboard correspondiente
-  switch(role) {
+  switch (role) {
     case 'Usuario':
-      return res.status(200).json({ message: 'Bienvenido al Dashboard de Usuario', role });
     case 'Departamento Comercial':
-      return res.status(200).json({ message: 'Bienvenido al Dashboard de Departamento Comercial', role });
     case 'Gestión y Tramitación de Documentación':
-      return res.status(200).json({ message: 'Bienvenido al Dashboard de Gestión y Tramitación de Documentación', role });
     case 'Pagos y Recobros':
-      return res.status(200).json({ message: 'Bienvenido al Dashboard de Pagos y Recobros', role });
     case 'Administrador':
-      return res.status(200).json({ message: 'Bienvenido al Dashboard de Administrador', role });
+      return res.status(200).json({ message: `Bienvenido al Dashboard de ${role}`, role });
     default:
+      console.error('Rol no autorizado desde el servidor:', role);
       return res.status(403).json({ message: 'Acceso denegado. Rol no autorizado' });
   }
 });

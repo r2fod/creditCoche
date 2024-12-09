@@ -46,15 +46,29 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Usuario no encontrado.' });
     }
 
+    // Agregamos logs para verificar las contraseñas
+    // console.log("Contraseña ingresada:", password.trim());
+    // console.log("Contraseña almacenada (hash):", user.password);
+
     // Comprobamos que la contraseña ingresada coincida con la almacenada
     const isMatch = await bcrypt.compare(password.trim(), user.password);
+    console.log("¿Contraseña coincide?", isMatch);
 
     if (!isMatch) {
       return res.status(400).json({ message: 'Contraseña incorrecta.' });
     }
 
     // Si la contraseña es correcta, generamos el token JWT
-    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        role: user.role,
+        email: user.email, // Agrega email al token
+        name: user.name    // Agrega name al token
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
     res.status(200).json({
       message: 'Login exitoso.',
@@ -66,6 +80,7 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: 'Error en el servidor. Por favor, intenta nuevamente más tarde.' });
   }
 };
+
 
 
 // Función para recuperación de contraseña
@@ -123,39 +138,58 @@ const verifyResetToken = async (req, res) => {
   const { token } = req.params;
 
   try {
-    const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpire: { $gt: Date.now() } });
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpire: { $gt: Date.now() }, // Verifica si el token no ha expirado
+    });
+
     if (!user) {
-      return res.status(400).json({ message: 'Token inválido o expirado.' });
+      return res.status(400).json({ message: 'Token inválido o ha expirado.' });
     }
 
     res.status(200).json({ message: 'Token válido.' });
   } catch (error) {
-    console.error(error);
+    console.error('Error al verificar el token:', error);
     res.status(500).json({ message: 'Error al verificar el token.' });
   }
 };
+
 
 // Restablecimiento de la contraseña
 const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
 
   try {
-    const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpire: { $gt: Date.now() } });
+    // Buscar al usuario con el token de restablecimiento y verificar si el token ha expirado
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
     if (!user) {
-      return res.status(400).json({ message: 'Token inválido o expirado.' });
+      return res.status(400).json({ message: 'Token inválido o ha expirado.' });
     }
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    // Agregamos logs para verificar el estado actual del usuario
+    console.log("Usuario encontrado para restablecer contraseña:", user.email);
+    console.log("Contraseña actual (hash):", user.password);
+
+    // Asignamos la nueva contraseña directamente para evitar doble hasheado
+    user.password = newPassword; // El middleware `pre('save')` se encargará de hashearla
+
+    // Limpiar el token de restablecimiento y su fecha de expiración
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
 
     await user.save();
 
+    console.log("Nueva contraseña (hash):", user.password);
     res.status(200).json({ message: 'Contraseña actualizada con éxito.' });
   } catch (error) {
-    console.error(error);
+    console.error('Error al restablecer la contraseña:', error);
     res.status(500).json({ message: 'Hubo un error al restablecer la contraseña.' });
   }
 };
+
 
 module.exports = { registerUser, loginUser, forgotPassword, verifyResetToken, resetPassword };

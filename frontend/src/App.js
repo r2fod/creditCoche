@@ -11,14 +11,6 @@ import DashboardGestion from './pages/DashboardGestion'; // Nuevo dashboard para
 import DashboardPagos from './pages/DashboardPagos'; // Nuevo dashboard para Pagos y Recobros
 import PrivateRoute from './components/PrivateRoute';  // Un componente para proteger rutas
 
-// Componente para la ruta no autorizada
-const Unauthorized = () => (
-  <div>
-    <h2>Acceso no autorizado</h2>
-    <p>No tienes los permisos necesarios para acceder a esta página.</p>
-  </div>
-);
-
 const App = () => {
   return (
     <Router>
@@ -70,9 +62,6 @@ const App = () => {
             </PrivateRoute>
           } 
         />
-
-        {/* Ruta para acceso no autorizado */}
-        <Route path="/unauthorized" element={<Unauthorized />} />
       </Routes>
     </Router>
   );

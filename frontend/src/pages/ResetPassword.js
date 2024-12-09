@@ -55,13 +55,13 @@ const ResetPassword = () => {
         token,
         newPassword,
       });
+      console.log("Respuesta del servidor:", response.data);
       setMessage(response.data.message); // Mensaje de éxito
       setError(null); // Limpiar cualquier error
       navigate('/login'); // Redirigir al login después de restablecer la contraseña
     } catch (err) {
-      setMessage(null); // Limpiar el mensaje de éxito
-      setError('Hubo un error al restablecer la contraseña.');
       console.error('Error al restablecer la contraseña:', err);
+      setError(err.response?.data?.message || 'Hubo un error al restablecer la contraseña.');
     } finally {
       setLoading(false); // Finalizar estado de carga
     }

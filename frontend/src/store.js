@@ -1,9 +1,11 @@
+// store.js
 import { configureStore } from '@reduxjs/toolkit';
-import userReducer from './features/userSlice'; // Importar el reducer de usuario (debe ser creado)
+import userReducer from './features/userSlice'; // Importar el reducer de usuario
 
+// Configuración del store
 const store = configureStore({
   reducer: {
-    user: userReducer, // Aquí se registran los reducers
+    user: userReducer, // Registramos el reducer de usuario
   },
 });
 
